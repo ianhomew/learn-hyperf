@@ -5,18 +5,14 @@ namespace App\Controller;
 
 use Hyperf\HttpServer\Annotation\AutoController;
 use Hyperf\HttpServer\Contract\RequestInterface;
+use Hyperf\Utils\Context;
 
 /**
- * 不使用協程上下文context 會有問題
- * 1. access get()  return 1
- * 2. access update() foo=2  return 2
- * 3. repeat access get() return 2
- * 每次的請求都是獨立的 結果顯示必非獨立 會產生問題
- * 例如一個玩家Ａ目前擁有的金額是100元
- * 充值200元 現在是300元
- * 輪到玩家Ｂ 會直接抓出300元
  *
- * 主要原因是因為 $foo 是整個進程共用的 因為 TestRequestController 是一個單例
+ * 1. access update() foo=2  return 2
+ * 3. access get() return foo is null
+ * 每次的請求都是獨立的 上一次的請求不影響這次的請求
+ * http本來就是無狀態 good
  *
  * @AutoController()
  *
@@ -26,17 +22,16 @@ use Hyperf\HttpServer\Contract\RequestInterface;
 class TestRequestController
 {
 
-    private $foo = 1;
-
     public function get()
     {
-        return $this->foo;
+        return Context::get('foo', 'foo is null');
     }
 
     public function update(RequestInterface $request)
     {
-        $this->foo = $request->input('foo');
+        $foo = $request->input('foo');
+        Context::set('foo', $foo);
 
-        return $this->foo;
+        return Context::get('foo');
     }
 }
