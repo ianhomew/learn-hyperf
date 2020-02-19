@@ -15,6 +15,7 @@ use Hyperf\Utils\Context;
  * http本來就是無狀態 good
  *
  * @AutoController()
+ * @property int $foo
  *
  * Class TestRequestController
  * @package App\Controller
@@ -24,14 +25,26 @@ class TestRequestController
 
     public function get()
     {
-        return Context::get('foo', 'foo is null');
+        return $this->foo;
     }
 
     public function update(RequestInterface $request)
     {
         $foo = $request->input('foo');
-        Context::set('foo', $foo);
+        $this->foo = $foo;
 
-        return Context::get('foo');
+        return $this->foo;
     }
+
+    public function __get($name)
+    {
+        return Context::get(__CLASS__ . ':' . $name, null);
+    }
+
+    public function __set($name, $value)
+    {
+        Context::set(__CLASS__ . ':' . $name, $value);
+    }
+
+
 }
