@@ -9,6 +9,7 @@ use App\Middleware\FooMiddleware;
 use Hyperf\HttpServer\Annotation\AutoController;
 use Hyperf\HttpServer\Annotation\Middleware;
 use Hyperf\HttpServer\Annotation\Middlewares;
+use Psr\Http\Message\ServerRequestInterface;
 
 /**
  * @AutoController()
@@ -26,8 +27,11 @@ class MiddlewareController
 {
 
 
-    public function index()
+    public function index(ServerRequestInterface $request)
     {
+
+        var_dump($request->getAttribute('foo'));
+
         return 'index';
     }
 }
