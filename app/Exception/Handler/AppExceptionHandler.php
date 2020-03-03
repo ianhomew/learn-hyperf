@@ -40,5 +40,7 @@ class AppExceptionHandler extends ExceptionHandler
     public function isValid(Throwable $throwable): bool
     {
         return true;
+        // 這裡定義 哪些例外要處理
+//        return $throwable instanceof \RuntimeException;
     }
 }
