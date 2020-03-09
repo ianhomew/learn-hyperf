@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Websocket</title>
+
+    <style>
+        div.room {
+            background-color: #248ee3;
+            width: 50vw;
+            min-height: 500px;
+            max-height: 80vh;
+            margin: 10px;
+            padding: 10px;
+
+            display: flex;
+            flex-direction: column;
+        }
+
+        .messages {
+            overflow-y: scroll;
+        }
+
+        .messages > .left {
+            background-color: DodgerBlue;
+            color: white;
+            width: 50vw;
+            text-align: left;
+            line-height: 75px;
+            font-size: 30px;
+        }
+
+        .messages > .right {
+            background-color: DodgerBlue;
+            color: white;
+            width: 50vw;
+            text-align: right;
+            line-height: 75px;
+            font-size: 30px;
+        }
+
+    </style>
+
+</head>
+<body>
+
+
+<div class="room">
+    <div id="messages" class="messages">
+        <div class="left">left</div>
+        <div class="left">left</div>
+        <div class="left">left</div>
+        <div class="left">left</div>
+        <div class="left">left</div>
+        <div class="left">left</div>
+        <div class="left">left</div>
+        <div class="left">left</div>
+        <div class="left">left</div>
+        <div class="left">left</div>
+        <div class="left">left</div>
+        <div class="right">right</div>
+    </div>
+    <div>
+        <input id="content" type="text">
+        <button id="send" type="button">Send</button>
+    </div>
+</div>
+
+
+<script>
+
+    const userId = Math.floor(Math.random() * 999) + 1;
+
+    const sendButton = document.getElementById('send');
+    const sendContent = document.getElementById('content');
+    const messages = document.getElementById('messages');
+
+
+    const host = 'ws://localhost:9502/user';
+    let ws = new WebSocket(host)
+
+    ws.onopen = () => {
+        console.log('open connection')
+    }
+
+    //關閉後執行的動作，指定一個 function 會在連結中斷後執行
+    ws.onclose = () => {
+        console.log('close connection')
+
+        // 重新連線
+        console.log('re connect to server')
+        ws = new WebSocket(host);
+    }
+
+    //接收 Server 發送的訊息
+    ws.onmessage = event => {
+        console.log(event)
+        push2Messages(event.data)
+    }
+
+    sendButton.addEventListener('click', function () {
+        if (sendContent.value !== '') {
+            sendMessage(sendContent.value)
+        }
+    });
+
+
+
+
+    /**
+     *  文字發送到 server
+     */
+    function sendMessage(message) {
+        const tmp = {
+            userId,
+            message
+        }
+        ws.send(JSON.stringify(tmp))
+    }
+
+    /**
+     * 接收伺服器接收的聊天訊息 放入 html 內
+     * @param message
+     */
+    function push2Messages(message) {
+        const div = document.createElement('div');
+        const data = JSON.parse(message);
+
+        if (data.userId === userId) {
+            div.classList.add('right');
+        } else {
+            div.classList.add('left');
+        }
+
+        div.innerText = data.message;
+        messages.append(div);
+        messages.scrollTop = messages.scrollHeight;
+
+        sendContent.value = '';
+    }
+
+
+</script>
+</body>
+</html>

@@ -16,4 +16,5 @@ Router::addRoute(['GET', 'POST', 'HEAD'], '/', 'App\Controller\IndexController@i
 
 Router::addServer('ws', function () {
     Router::get('/', 'App\Controller\WebSocketController');
+    Router::get('/user', 'App\Controller\UserController');
 });
